@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
-
+# 웹사이트에서 이름, URL 가져오기
 url = 'https://famouspeople.astro-seek.com/filter_death/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='
 page = requests.get(url)
 html = page.text
@@ -19,3 +19,29 @@ for name in name_list:
 for url in url_list:
     url_full_list.append(url.get('href'))
 
+
+#for url in url_full_list:
+
+# 세부 사이트로 들어가서 행성 정보 받아오기
+url2 = 'https://birthcharts.astro-seek.com/birth-chart/bela-lugosi-horoscope'
+horoscope = requests.get(url2)
+html = horoscope.text
+soup = bs(html, 'lxml')
+
+data = [] #name, birthdate, death, cause, occupation, sun, moon, mercury, venus, mars, jupiter, saturn
+name = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > h2')[0].text
+print(name)
+birthdate = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(3) > div:nth-of-type(4)')
+print(birthdate)
+death = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(8) > div:nth-of-type(2) > a')[0].text
+cause = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(8) > div:nth-of-type(2) > span > a')[0].text
+occupation = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(12) > div:nth-of-type(2)')[0].text
+
+
+#행성별 숫자 가져오기 : 행성에 따라 확인할 필요 있음
+degree1 = soup.select('div.right-sedy-banner-svetlejsi > div > div:nth-of-type(5) > span')[2].text
+degree2 = soup.select('div.right-sedy-banner-svetlejsi > div > div:nth-of-type(5) > span')[3].text
+
+#문자열 수정 및 숫자로 변환
+degree = float((degree1 + '.' + degree2).replace("’",""))
+print(degree)
