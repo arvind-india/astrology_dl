@@ -1,26 +1,40 @@
 import requests
 from bs4 import BeautifulSoup as bs
 import datetime
-
-
-# 웹사이트에서 이름, URL 가져오기
-url = 'https://famouspeople.astro-seek.com/filter_death/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='
-page = requests.get(url)
-html = page.text
-soup = bs(html, 'lxml')
+import re
 
 name_full_list = []
 url_full_list = []
 person_astrology_data = []
 
-name_list = soup.select('td.w300_p5 > a > span > strong')
-url_list = soup.select('td.w300_p5 > a')
+url = 'https://famouspeople.astro-seek.com/filter_death/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='
+page = requests.get(url)
+html = page.text
+soup = bs(html, 'lxml')
 
-for name in name_list:
-    name_full_list.append(name.text)
+page_re = re.compile('1 / \d\d\d')
+page_source = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div:nth-of-type(4) > div > div.result-listovani')[0].find_all(string = page_re)
+last_page = int(page_source[0][-3:])
 
-for url in url_list:
-    url_full_list.append(url.get('href'))
+
+
+
+for p in range(1,last_page + 1):
+    page_num = p * 200 - 200
+    url = 'https://famouspeople.astro-seek.com/filter_death_{0}/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='.format(page_num)
+    page = requests.get(url)
+    html = page.text
+    soup = bs(html, 'lxml')
+
+    name_list = soup.select('td.w300_p5 > a > span > strong')
+    url_list = soup.select('td.w300_p5 > a')
+
+    for name in name_list:
+        name_full_list.append(name.text)
+
+    for url in url_list:
+        url_full_list.append(url.get('href'))
+
 
 
 for i, person_url in enumerate(url_full_list):
