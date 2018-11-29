@@ -7,24 +7,24 @@ name_full_list = []
 url_full_list = []
 person_astrology_data = []
 
-url = 'https://famouspeople.astro-seek.com/filter_death/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='
-page = requests.get(url)
-html = page.text
-soup = bs(html, 'lxml')
-
 page_re = re.compile('1 / \d\d\d')
-page_source = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div:nth-of-type(4) > div > div.result-listovani')[0].find_all(string = page_re)
-last_page = int(page_source[0][-3:])
 
-
-
-
-for p in range(1,last_page + 1):
-    page_num = p * 200 - 200
-    url = 'https://famouspeople.astro-seek.com/filter_death_{0}/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='.format(page_num)
+def get_soup(url):
     page = requests.get(url)
     html = page.text
     soup = bs(html, 'lxml')
+    return soup
+
+url1 = 'https://famouspeople.astro-seek.com/filter_death/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='
+soup = get_soup(url1)
+
+page_source = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div:nth-of-type(4) > div > div.result-listovani')[0].find_all(string = page_re)
+last_page = int(page_source[0][-3:])
+
+for p in range(1,last_page + 1):
+    page_num = p * 200 - 200
+    url_page = 'https://famouspeople.astro-seek.com/filter_death_{0}/?umrti_den=nezalezi&umrti_mesic=nezalezi&umrti_rok=&pricina_umrti=&pohlavi=&razeni='.format(page_num)
+    soup = get_soup(url_page)
 
     name_list = soup.select('td.w300_p5 > a > span > strong')
     url_list = soup.select('td.w300_p5 > a')
@@ -35,15 +35,10 @@ for p in range(1,last_page + 1):
     for url in url_list:
         url_full_list.append(url.get('href'))
 
-
-
-for i, person_url in enumerate(url_full_list):
-
 # 세부 사이트로 들어가서 행성 정보 받아오기
+for i, person_url in enumerate(url_full_list):
     url2 = person_url
-    horoscope = requests.get(url2)
-    html = horoscope.text
-    soup = bs(html, 'lxml')
+    soup = get_soup(url2)
 
     data = [] #name, birthdate, death, cause, occupation, sun, moon, mercury, venus, mars, jupiter, saturn
     name = name_full_list[i]
@@ -55,9 +50,7 @@ for i, person_url in enumerate(url_full_list):
     #cause = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(7) > div:nth-of-type(2) > span > a')[0].text
     occupation = soup.select('body > div.main-nad-envelope > div.main-envelope > div.main-web > div.stredni-menu > div.obsah > div.obsah-uvod > div.obsah-vnitrek > div.detail-info > div:nth-of-type(11) > div:nth-of-type(2)')[0].text.strip()
 
-
     #행성별 숫자 가져오기 : 행성에 따라 확인할 필요 있음
-
     sign = {'aries' : 0.00, 'taurus' : 30.00, 'gemini' : 60.00, 'cancer' : 90.00, 'leo' : 120.00, 'virgo' : 150.00, 'libra' : 180.00, 'scorpio' : 210.00, 'sagittarius' : 240.00, 'capricorn' : 270.00, 'aquarius' : 300.00, 'pisces' : 330.00}
 
     def get_degree(symbol):
