@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 import datetime
 import re
+import os
 
 name_full_list = []
 url_full_list = []
@@ -113,4 +114,6 @@ for i, person_url in enumerate(url_full_list):
         data.append(input)
     person_astrology_data.append(data)
 
-print(person_astrology_data)
+f = open('astrology.txt', 'w')
+f.write(person_astrology_data)
+f.close()
